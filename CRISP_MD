@@ -1,0 +1,104 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyOKI/gX05y6OENU81XyXU9P",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/MarioBonifasius/app_edit/blob/main/CRISP_MD\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 17,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Pfluhd2PC0JX",
+        "outputId": "2dbf7e83-b361-44d8-e50a-8e118f75cd6d"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: ucimlrepo in /usr/local/lib/python3.10/dist-packages (0.0.7)\n",
+            "Requirement already satisfied: pandas>=1.0.0 in /usr/local/lib/python3.10/dist-packages (from ucimlrepo) (2.2.2)\n",
+            "Requirement already satisfied: certifi>=2020.12.5 in /usr/local/lib/python3.10/dist-packages (from ucimlrepo) (2024.8.30)\n",
+            "Requirement already satisfied: numpy>=1.22.4 in /usr/local/lib/python3.10/dist-packages (from pandas>=1.0.0->ucimlrepo) (1.26.4)\n",
+            "Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.10/dist-packages (from pandas>=1.0.0->ucimlrepo) (2.8.2)\n",
+            "Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.10/dist-packages (from pandas>=1.0.0->ucimlrepo) (2024.2)\n",
+            "Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.10/dist-packages (from pandas>=1.0.0->ucimlrepo) (2024.2)\n",
+            "Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.10/dist-packages (from python-dateutil>=2.8.2->pandas>=1.0.0->ucimlrepo) (1.16.0)\n",
+            "Mengunduh dataset...\n",
+            "\n",
+            "Melatih model...\n",
+            "\n",
+            "Akurasi model: 0.9004755059161783\n"
+          ]
+        }
+      ],
+      "source": [
+        "# Instalasi library (hanya perlu dilakukan sekali)\n",
+        "!pip install ucimlrepo\n",
+        "\n",
+        "# Impor library yang dibutuhkan\n",
+        "from ucimlrepo import fetch_ucirepo\n",
+        "import pandas as pd\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.ensemble import RandomForestClassifier\n",
+        "from sklearn.metrics import accuracy_score\n",
+        "from sklearn.preprocessing import LabelEncoder\n",
+        "\n",
+        "# Fetch dataset dari UCI\n",
+        "print(\"Mengunduh dataset...\")\n",
+        "bank_marketing = fetch_ucirepo(id=222)\n",
+        "\n",
+        "# Ekstrak data (features dan target)\n",
+        "X = bank_marketing.data.features\n",
+        "y = bank_marketing.data.targets\n",
+        "\n",
+        "# Identifikasi kolom kategorikal dan konversi\n",
+        "for col in X.select_dtypes(include=['object']).columns:\n",
+        "    le = LabelEncoder()\n",
+        "    X.loc[:, col] = le.fit_transform(X[col])\n",
+        "\n",
+        "# Split data menjadi training dan testing\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n",
+        "\n",
+        "# Ubah y menjadi 1D menggunakan .values dan .ravel()\n",
+        "y_train = y_train.values.ravel()\n",
+        "y_test = y_test.values.ravel()\n",
+        "\n",
+        "# Latih model Random Forest\n",
+        "print(\"\\nMelatih model...\")\n",
+        "model = RandomForestClassifier(random_state=42)\n",
+        "model.fit(X_train, y_train)\n",
+        "\n",
+        "# Prediksi dan evaluasi model\n",
+        "y_pred = model.predict(X_test)\n",
+        "accuracy = accuracy_score(y_test, y_pred)\n",
+        "print(\"\\nAkurasi model:\", accuracy)\n"
+      ]
+    }
+  ]
+}
